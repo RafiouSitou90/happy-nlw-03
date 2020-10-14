@@ -1,6 +1,6 @@
 import React from 'react';
 import { BrowserRouter, Switch, Route } from 'react-router-dom'
-import { CreateOrphanage, Landing, OrphanagesMap } from "./pages";
+import { CreateOrphanage, Landing, Orphanage, OrphanagesMap } from './pages'
 
 const Routes = () => {
     return (
@@ -9,7 +9,8 @@ const Routes = () => {
                 <Route path="/" exact component={Landing} />
                 <Route path="/app" component={OrphanagesMap} />
 
-                <Route path="/orphanage/create" component={CreateOrphanage} />
+                <Route path="/orphanages/create" component={CreateOrphanage} />
+                <Route path="/orphanages/:id" component={Orphanage} />
             </Switch>
         </BrowserRouter>
     )
