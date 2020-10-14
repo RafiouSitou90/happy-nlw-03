@@ -2,21 +2,11 @@ import React from 'react'
 import { FaWhatsapp } from 'react-icons/fa'
 import { FiClock, FiInfo } from 'react-icons/fi'
 import { Map, Marker, TileLayer } from 'react-leaflet'
-import Leaflet from 'leaflet';
 
 import { Sidebar } from '../components'
-
-import mapMarkerImg from '../assets/images/map-marker.svg'
+import {mapIcon} from '../utils'
 
 import '../styles/pages/orphanage.css'
-
-const happyMapIcon = Leaflet.icon({
-    iconUrl: mapMarkerImg,
-
-    iconSize: [48, 58],
-    iconAnchor: [29, 68],
-    popupAnchor: [0, -60]
-})
 
 export default function Orphanage() {
 
@@ -69,7 +59,7 @@ export default function Orphanage() {
                                 <TileLayer
                                     url={`https://api.mapbox.com/styles/v1/mapbox/light-v10/tiles/256/{z}/{x}/{y}@2x?access_token=${process.env.REACT_APP_MAPBOX_TOKEN}`}
                                 />
-                                <Marker interactive={false} icon={happyMapIcon} position={[-27.2092052,-49.6401092]} />
+                                <Marker interactive={false} icon={mapIcon} position={[-27.2092052,-49.6401092]} />
                             </Map>
 
                             <footer>
