@@ -1,3 +1,4 @@
+import { AppLoading } from 'expo'
 import React from 'react'
 import {
 	Dimensions,
@@ -8,12 +9,28 @@ import {
 } from 'react-native'
 import MapView, { PROVIDER_GOOGLE, Marker, Callout } from 'react-native-maps'
 import { Feather as Icon } from '@expo/vector-icons'
+import { useFonts } from 'expo-font'
+import {
+	Nunito_600SemiBold,
+	Nunito_700Bold,
+	Nunito_800ExtraBold,
+} from '@expo-google-fonts/nunito'
 
 import mapMarker from './src/assets/images/map-marker.png'
 
 const { width, height } = Dimensions.get('window')
 
 export default function App() {
+	const [fontsLoaded] = useFonts({
+		Nunito_600SemiBold,
+		Nunito_700Bold,
+		Nunito_800ExtraBold,
+	})
+
+	if (!fontsLoaded) {
+		return <AppLoading />
+	}
+
 	return (
 		<View style={styles.container}>
 			<MapView
@@ -77,6 +94,7 @@ const styles = StyleSheet.create({
 	calloutText: {
 		color: '#0089A5',
 		fontSize: 14,
+		fontFamily: 'Nunito_700Bold',
 	},
 
 	footer: {
@@ -98,6 +116,7 @@ const styles = StyleSheet.create({
 	},
 
 	footerText: {
+		fontFamily: 'Nunito_700Bold',
 		color: '#8FA7B3',
 	},
 
