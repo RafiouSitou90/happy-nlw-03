@@ -1,17 +1,92 @@
-import React from 'react'
+import { Feather } from '@expo/vector-icons'
+import { useNavigation, useRoute } from '@react-navigation/native'
+import React, { useState } from 'react'
 import {
+	Alert,
+	Image,
 	ScrollView,
-	View,
 	StyleSheet,
 	Switch,
 	Text,
 	TextInput,
 	TouchableOpacity,
+	View,
 } from 'react-native'
-import { Feather } from '@expo/vector-icons'
 import { RectButton } from 'react-native-gesture-handler'
+import * as ImagePicker from 'expo-image-picker'
+import { api } from '../../services'
+
+interface OrphanageDataParams {
+	position: {
+		latitude: number
+		longitude: number
+	}
+}
 
 const OrphanageData = () => {
+	const route = useRoute()
+	const navigation = useNavigation()
+
+	const params = route.params as OrphanageDataParams
+
+	const [name, setName] = useState<string>('')
+	const [about, setAbout] = useState<string>('')
+	const [instructions, setInstructions] = useState<string>('')
+	const [opening_hours, setOpeningHours] = useState<string>('')
+	const [open_on_weekends, setOpenOnWeekends] = useState<boolean>(false)
+	const [images, setImages] = useState<string[]>([])
+
+	async function handleSelectImages() {
+		const { status } = await ImagePicker.requestCameraRollPermissionsAsync()
+
+		if (status !== 'granted') {
+			alert('The app need a permission to access your image gallery')
+			return
+		}
+
+		const result = await ImagePicker.launchImageLibraryAsync({
+			allowsEditing: true,
+			quality: 1,
+			mediaTypes: ImagePicker.MediaTypeOptions.Images,
+		})
+
+		if (result.cancelled) {
+			return
+		}
+
+		const { uri: image } = result
+
+		setImages([...images, image])
+	}
+
+	async function handleCreateOrphanage() {
+		const { latitude, longitude } = params.position
+
+		const formData = new FormData()
+
+		formData.append('name', name)
+		formData.append('about', about)
+		formData.append('instructions', instructions)
+		formData.append('opening_hours', opening_hours)
+		formData.append('latitude', String(latitude))
+		formData.append('longitude', String(longitude))
+		formData.append('open_on_weekends', String(open_on_weekends))
+
+		images.forEach((image, index) => {
+			formData.append('images', {
+				name: `image_${index}.jpg`,
+				type: 'image/jpg',
+				uri: image,
+			} as any)
+		})
+
+		await api.post('orphanages', formData)
+
+		Alert.alert('Success', 'Orphanage created successfully!')
+
+		navigation.navigate('OrphanagesMap')
+	}
+
 	return (
 		<ScrollView
 			style={styles.container}
@@ -20,36 +95,77 @@ const OrphanageData = () => {
 			<Text style={styles.title}>Data</Text>
 
 			<Text style={styles.label}>Name</Text>
-			<TextInput style={styles.input} />
+			<TextInput
+				style={styles.input}
+				onChangeText={(text) => setName(text)}
+				value={name}
+			/>
 
 			<Text style={styles.label}>About</Text>
-			<TextInput style={[styles.input, { height: 110 }]} multiline />
+			<TextInput
+				style={[styles.input, { height: 110 }]}
+				onChangeText={setAbout}
+				value={about}
+				multiline
+			/>
 
+			{/*
 			<Text style={styles.label}>WhatsApp</Text>
 			<TextInput style={styles.input} />
+*/}
 
 			<Text style={styles.label}>Images</Text>
-			<TouchableOpacity style={styles.imagesInput} onPress={() => {}}>
+
+			<View style={styles.uploadedImagesContainer}>
+				{images.map((image) => {
+					return (
+						<Image
+							key={image}
+							source={{ uri: image }}
+							style={styles.uploadedImage}
+						/>
+					)
+				})}
+			</View>
+
+			<TouchableOpacity
+				style={styles.imagesInput}
+				onPress={handleSelectImages}
+			>
 				<Feather name='plus' size={24} color='#15B6D6' />
 			</TouchableOpacity>
 
 			<Text style={styles.title}>Visit</Text>
 
 			<Text style={styles.label}>Instructions</Text>
-			<TextInput style={[styles.input, { height: 110 }]} multiline />
+			<TextInput
+				style={[styles.input, { height: 110 }]}
+				onChangeText={setInstructions}
+				value={instructions}
+				multiline
+			/>
 
 			<Text style={styles.label}>Opening hours</Text>
-			<TextInput style={styles.input} />
+			<TextInput
+				style={styles.input}
+				onChangeText={setOpeningHours}
+				value={opening_hours}
+			/>
 
 			<View style={styles.switchContainer}>
 				<Text style={styles.label}>Open weekend?</Text>
 				<Switch
 					thumbColor='#fff'
 					trackColor={{ false: '#ccc', true: '#39CC83' }}
+					value={open_on_weekends}
+					onValueChange={setOpenOnWeekends}
 				/>
 			</View>
 
-			<RectButton style={styles.nextButton} onPress={() => {}}>
+			<RectButton
+				style={styles.nextButton}
+				onPress={handleCreateOrphanage}
+			>
 				<Text style={styles.nextButtonText}>Register</Text>
 			</RectButton>
 		</ScrollView>
@@ -92,6 +208,18 @@ const styles = StyleSheet.create({
 		paddingHorizontal: 24,
 		marginBottom: 16,
 		textAlignVertical: 'top',
+	},
+
+	uploadedImagesContainer: {
+		flexDirection: 'row',
+	},
+
+	uploadedImage: {
+		width: 64,
+		height: 64,
+		borderRadius: 20,
+		marginBottom: 32,
+		marginRight: 8,
 	},
 
 	imagesInput: {

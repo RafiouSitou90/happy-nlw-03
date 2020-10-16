@@ -1,42 +1,53 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { View, StyleSheet, Dimensions, Text } from 'react-native'
 
 import { useNavigation } from '@react-navigation/native'
 import { RectButton } from 'react-native-gesture-handler'
-import MapView, { Marker } from 'react-native-maps'
+import MapView, { MapEvent, Marker } from 'react-native-maps'
 
 import mapMarkerImg from '../../assets/images/map-marker.png'
 
 const SelectMapPosition = () => {
 	const navigation = useNavigation()
 
+	const [position, setPosition] = useState({ latitude: 0, longitude: 0 })
+
 	function handleNextStep() {
-		navigation.navigate('OrphanageData')
+		navigation.navigate('OrphanageData', { position })
+	}
+
+	function handleSelectMapPosition(event: MapEvent) {
+		setPosition(event.nativeEvent.coordinate)
 	}
 
 	return (
 		<View style={styles.container}>
 			<MapView
 				initialRegion={{
-					latitude: -27.2092052,
-					longitude: -49.6401092,
+					latitude: -15.8665877,
+					longitude: -47.9713124,
 					latitudeDelta: 0.008,
 					longitudeDelta: 0.008,
 				}}
 				style={styles.mapStyle}
+				onPress={handleSelectMapPosition}
 			>
-				<Marker
-					icon={mapMarkerImg}
-					coordinate={{
-						latitude: -15.868693,
-						longitude: -47.9669243,
-					}}
-				/>
+				{position.latitude !== 0 && (
+					<Marker
+						icon={mapMarkerImg}
+						coordinate={{
+							latitude: position.latitude,
+							longitude: position.longitude,
+						}}
+					/>
+				)}
 			</MapView>
 
-			<RectButton style={styles.nextButton} onPress={handleNextStep}>
-				<Text style={styles.nextButtonText}>Next</Text>
-			</RectButton>
+			{position.latitude !== 0 && (
+				<RectButton style={styles.nextButton} onPress={handleNextStep}>
+					<Text style={styles.nextButtonText}>Next</Text>
+				</RectButton>
+			)}
 		</View>
 	)
 }

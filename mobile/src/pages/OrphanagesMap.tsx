@@ -1,9 +1,9 @@
 import { Feather as Icon } from '@expo/vector-icons'
-import React, { useEffect, useState } from 'react'
+import React, { useState } from 'react'
 import { Dimensions, StyleSheet, Text, View } from 'react-native'
 import { RectButton } from 'react-native-gesture-handler'
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps'
-import { useNavigation } from '@react-navigation/native'
+import { useNavigation, useFocusEffect } from '@react-navigation/native'
 import { api } from '../services'
 
 import mapMarker from '../assets/images/map-marker.png'
@@ -30,11 +30,11 @@ const OrphanagesMap = () => {
 		navigation.navigate('SelectMapPosition')
 	}
 
-	useEffect(() => {
+	useFocusEffect(() => {
 		api.get('orphanages').then((response) => {
 			setOrphanages(response.data)
 		})
-	}, [])
+	})
 
 	return (
 		<View style={styles.container}>
