@@ -9,14 +9,16 @@ import {
 } from 'react-native'
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 import { Feather, FontAwesome } from '@expo/vector-icons'
-
 import { RectButton } from 'react-native-gesture-handler'
+// import { useRoute } from '@react-navigation/native'
 
 import mapMarkerImg from '../assets/images/map-marker.png'
 
 const { width } = Dimensions.get('window')
 
 const OrphanageDetails = () => {
+	// const route = useRoute()
+
 	return (
 		<ScrollView style={styles.container}>
 			<View style={styles.imagesContainer}>
