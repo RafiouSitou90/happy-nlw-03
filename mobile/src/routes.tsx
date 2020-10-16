@@ -1,7 +1,12 @@
 import React from 'react'
 import { NavigationContainer } from '@react-navigation/native'
 import { createStackNavigator } from '@react-navigation/stack'
-import { OrphanageDetails, OrphanagesMap } from './pages'
+import {
+	OrphanageData,
+	OrphanageDetails,
+	OrphanagesMap,
+	SelectMapPosition,
+} from './pages'
 
 const { Navigator, Screen } = createStackNavigator()
 
@@ -14,6 +19,11 @@ const Routes = () => {
 					name={'OrphanageDetails'}
 					component={OrphanageDetails}
 				/>
+				<Screen
+					name={'SelectMapPosition'}
+					component={SelectMapPosition}
+				/>
+				<Screen name={'OrphanageData'} component={OrphanageData} />
 			</Navigator>
 		</NavigationContainer>
 	)

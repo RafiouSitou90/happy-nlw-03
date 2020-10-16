@@ -1,12 +1,7 @@
 import { Feather as Icon } from '@expo/vector-icons'
 import React from 'react'
-import {
-	Dimensions,
-	StyleSheet,
-	Text,
-	TouchableOpacity,
-	View,
-} from 'react-native'
+import { Dimensions, StyleSheet, Text, View } from 'react-native'
+import { RectButton } from 'react-native-gesture-handler'
 import MapView, { Callout, Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 import { useNavigation } from '@react-navigation/native'
 
@@ -19,6 +14,10 @@ const OrphanagesMap = () => {
 
 	function handleNavigateToOrphanageDetail() {
 		navigation.navigate('OrphanageDetails')
+	}
+
+	function handleNavigateToCreateOrphanage() {
+		navigation.navigate('SelectMapPosition')
 	}
 
 	return (
@@ -51,12 +50,12 @@ const OrphanagesMap = () => {
 
 			<View style={styles.footer}>
 				<Text style={styles.footerText}>02 orphanages found</Text>
-				<TouchableOpacity
+				<RectButton
 					style={styles.createOrphanageButton}
-					onPress={() => true}
+					onPress={handleNavigateToCreateOrphanage}
 				>
 					<Icon name={'plus'} size={20} color={'#FFF'} />
-				</TouchableOpacity>
+				</RectButton>
 			</View>
 		</View>
 	)
