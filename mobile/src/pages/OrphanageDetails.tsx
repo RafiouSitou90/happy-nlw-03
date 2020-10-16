@@ -1,4 +1,5 @@
-import React from 'react'
+import { AppLoading } from 'expo'
+import React, { useEffect, useState } from 'react'
 import {
 	View,
 	Text,
@@ -6,60 +7,106 @@ import {
 	Image,
 	StyleSheet,
 	Dimensions,
+	TouchableOpacity,
+	Linking,
 } from 'react-native'
 import MapView, { Marker, PROVIDER_GOOGLE } from 'react-native-maps'
 import { Feather, FontAwesome } from '@expo/vector-icons'
 import { RectButton } from 'react-native-gesture-handler'
-// import { useRoute } from '@react-navigation/native'
+import { useRoute } from '@react-navigation/native'
+import { api } from '../services'
 
 import mapMarkerImg from '../assets/images/map-marker.png'
 
 const { width } = Dimensions.get('window')
 
+interface OrphanageDetailsRouteParams {
+	id: number
+}
+
+interface Orphanage {
+	name: string
+	about: string
+	latitude: number
+	longitude: number
+	instructions: string
+	opening_hours: string
+	open_on_weekends: boolean
+	images: Array<{ id: number; url: string }>
+}
+
 const OrphanageDetails = () => {
-	// const route = useRoute()
+	const route = useRoute()
+
+	const [orphanage, setOrphanage] = useState<Orphanage>()
+
+	const { id } = route.params as OrphanageDetailsRouteParams
+
+	useEffect(() => {
+		api.get(`orphanages/${id}`).then((response) => {
+			setOrphanage(response.data)
+		})
+	}, [id])
+
+	if (!orphanage) {
+		return (
+			<View
+				style={[
+					styles.container,
+					{ justifyContent: 'space-between', alignItems: 'center' },
+				]}
+			>
+				<Text>Loading...</Text>
+				<AppLoading />
+			</View>
+		)
+	}
+
+	const {
+		name,
+		about,
+		latitude,
+		longitude,
+		instructions,
+		opening_hours,
+		open_on_weekends,
+		images,
+	} = orphanage
+
+	function handleOpenGoogleMapRoutes() {
+		Linking.openURL(
+			`https://www.google.com/maps/dir/.api=1&destination=${latitude},${longitude}`
+		).then((_) => null)
+	}
 
 	return (
 		<ScrollView style={styles.container}>
 			<View style={styles.imagesContainer}>
 				<ScrollView horizontal pagingEnabled>
-					<Image
-						style={styles.image}
-						source={{
-							uri:
-								'https://fmnova.com.br/images/noticias/safe_image.jpg',
-						}}
-					/>
-					<Image
-						style={styles.image}
-						source={{
-							uri:
-								'https://fmnova.com.br/images/noticias/safe_image.jpg',
-						}}
-					/>
-					<Image
-						style={styles.image}
-						source={{
-							uri:
-								'https://fmnova.com.br/images/noticias/safe_image.jpg',
-						}}
-					/>
+					{images.map(({ id, url }) => {
+						return (
+							<Image
+								key={id}
+								style={styles.image}
+								source={{
+									uri: url,
+								}}
+							/>
+						)
+					})}
 				</ScrollView>
 			</View>
 
 			<View style={styles.detailsContainer}>
-				<Text style={styles.title}>Child House</Text>
-				<Text style={styles.description}>
-					Provides assistance to children aged 6 to 15 who is at risk
-					and / or socially vulnerable.
-				</Text>
+				<Text style={styles.title}>{name}</Text>
+				<Text style={styles.description}>{about}</Text>
 
 				<View style={styles.mapContainer}>
 					<MapView
 						provider={PROVIDER_GOOGLE}
 						initialRegion={{
-							latitude: -15.868693,
-							longitude: -47.9669243,
+							latitude,
+							longitude,
 							latitudeDelta: 0.008,
 							longitudeDelta: 0.008,
 						}}
@@ -72,26 +119,26 @@ const OrphanageDetails = () => {
 						<Marker
 							icon={mapMarkerImg}
 							coordinate={{
-								latitude: -15.868693,
-								longitude: -47.9669243,
+								latitude,
+								longitude,
 							}}
 						/>
 					</MapView>
 
-					<View style={styles.routesContainer}>
+					<TouchableOpacity
+						style={styles.routesContainer}
+						onPress={handleOpenGoogleMapRoutes}
+					>
 						<Text style={styles.routesText}>
 							View directions on Google Maps
 						</Text>
-					</View>
+					</TouchableOpacity>
 				</View>
 
 				<View style={styles.separator} />
 
 				<Text style={styles.title}>Visiting instructions</Text>
-				<Text style={styles.description}>
-					Come as you feel comfortable and bring a lot of love and
-					patience to give.
-				</Text>
+				<Text style={styles.description}>{instructions}</Text>
 
 				<View style={styles.scheduleContainer}>
 					<View
@@ -104,22 +151,44 @@ const OrphanageDetails = () => {
 								styles.scheduleTextBlue,
 							]}
 						>
-							Monday to Friday 8am to 6pm
+							{opening_hours}
 						</Text>
 					</View>
-					<View
-						style={[styles.scheduleItem, styles.scheduleItemGreen]}
-					>
-						<Feather name='info' size={40} color='#39CC83' />
-						<Text
+					{open_on_weekends ? (
+						<View
 							style={[
-								styles.scheduleText,
-								styles.scheduleTextGreen,
+								styles.scheduleItem,
+								styles.scheduleItemGreen,
 							]}
 						>
-							We serve weekend
-						</Text>
-					</View>
+							<Feather name='info' size={40} color='#39CC83' />
+							<Text
+								style={[
+									styles.scheduleText,
+									styles.scheduleTextGreen,
+								]}
+							>
+								We serve{'\n'}on weekend
+							</Text>
+						</View>
+					) : (
+						<View
+							style={[
+								styles.scheduleItem,
+								styles.scheduleItemRed,
+							]}
+						>
+							<Feather name='info' size={40} color='#FF669D' />
+							<Text
+								style={[
+									styles.scheduleText,
+									styles.scheduleTextRed,
+								]}
+							>
+								We don't serve{'\n'}on weekend
+							</Text>
+						</View>
+					)}
 				</View>
 
 				<RectButton style={styles.contactButton} onPress={() => {}}>
@@ -220,6 +289,13 @@ const styles = StyleSheet.create({
 		borderRadius: 20,
 	},
 
+	scheduleItemRed: {
+		backgroundColor: '#FEF6F9',
+		borderWidth: 1,
+		borderColor: '#FFBCD4',
+		borderRadius: 20,
+	},
+
 	scheduleText: {
 		fontFamily: 'Nunito_600SemiBold',
 		fontSize: 16,
@@ -233,6 +309,10 @@ const styles = StyleSheet.create({
 
 	scheduleTextGreen: {
 		color: '#37C77F',
+	},
+
+	scheduleTextRed: {
+		color: '#FF669D',
 	},
 
 	contactButton: {
